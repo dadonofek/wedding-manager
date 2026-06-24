@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <style>
+    :root { --bg:#faf7f2; --card:#fff; --ink:#2b2b2b; --accent:#9c6b4a; --muted:#8a8276; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, 'Segoe UI', Arial, sans-serif;
+           background: var(--bg); color: var(--ink); display:flex; justify-content:center; }
+    .card { background: var(--card); max-width: 460px; width: 100%; margin: 24px 16px;
+            padding: 28px 24px; border-radius: 16px; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+    h1 { font-size: 1.35rem; margin: 0 0 4px; }
+    .sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; line-height:1.5; }
+    label { display:block; margin: 16px 0 6px; font-weight: 600; }
+    select, textarea { width:100%; padding:11px 12px; border:1px solid #ddd;
+            border-radius:10px; font-size:1rem; font-family:inherit; background:#fff; }
+    button { margin-top: 22px; width:100%; padding:13px; border:0; border-radius:10px;
+             background: var(--accent); color:#fff; font-size:1.05rem; cursor:pointer; }
+    button:disabled { opacity:.6; cursor:default; }
+    .msg { margin-top:16px; padding:12px; border-radius:10px; text-align:center; display:none; }
+    .ok { background:#e8f5e9; color:#256029; }
+    .err { background:#fdecea; color:#a3251b; }
+    .notfound { text-align:center; color:var(--muted); padding: 30px 0; line-height:1.6; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <? if (!guest) { ?>
+      <h1>אישור הגעה</h1>
+      <div class="notfound">הקישור אינו תקין או שפג תוקפו.<br>אנא פנו לבעלי השמחה 💌</div>
+    <? } else { ?>
+      <h1>היי <?= guest.name ?> 👋</h1>
+      <p class="sub">
+        החתונה של <?= wedding.COUPLE ?><br>
+        <?= wedding.DATE_ISO ?> · <?= wedding.TIME ?> · <?= wedding.VENUE ?>
+      </p>
+
+      <label for="attending">כמה מכם מגיעים?</label>
+      <select id="attending">
+        <option value="">בחרו...</option>
+        <? for (var i = 0; i <= guest.maxGuests; i++) { ?>
+          <option value="<?= i ?>"><?= i ?><?= i === 0 ? ' — לא נגיע' : '' ?></option>
+        <? } ?>
+      </select>
+
+      <label for="dietary">הערות / העדפות תזונה (לא חובה)</label>
+      <textarea id="dietary" rows="2" placeholder="צמחוני, אלרגיות וכו'"></textarea>
+
+      <button id="send" onclick="submitRsvp()">שליחת אישור</button>
+      <div id="msg" class="msg"></div>
+
+      <script>
+        var TOKEN = "<?= guest.id ?>";
+
+        function submitRsvp() {
+          var att = document.getElementById('attending').value;
+          if (att === '') { show('err', 'אנא בחרו כמה מגיעים'); return; }
+          var btn = document.getElementById('send');
+          btn.disabled = true; btn.textContent = 'שולח...';
+          google.script.run
+            .withSuccessHandler(function (r) {
+              if (r && r.ok) {
+                show('ok', r.status === 'CONFIRMED' ? 'תודה! נתראה בשמחה 🎉' : 'תודה על העדכון 💙');
+              } else { show('err', 'אירעה שגיאה, נסו שוב'); resetBtn(); }
+            })
+            .withFailureHandler(function () { show('err', 'אירעה שגיאה, נסו שוב'); resetBtn(); })
+            .submitRsvp({
+              token: TOKEN,
+              attending: att,
+              dietary: document.getElementById('dietary').value
+            });
+        }
+        function show(cls, text) {
+          var m = document.getElementById('msg');
+          m.className = 'msg ' + cls; m.textContent = text; m.style.display = 'block';
+        }
+        function resetBtn() {
+          var b = document.getElementById('send');
+          b.disabled = false; b.textContent = 'שליחת אישור';
+        }
+      </script>
+    <? } ?>
+  </div>
+</body>
+</html>
