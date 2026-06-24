@@ -31,11 +31,11 @@ const CONFIG = {
 
   // Wedding details — used in messages and on the RSVP form
   WEDDING: {
-    COUPLE: 'דנה ויוסי',                 // edit
-    DATE_ISO: '2026-09-10',               // YYYY-MM-DD
-    TIME: '19:00',                        // edit
-    VENUE: 'אולמי הגן, תל אביב',          // edit
-    MAP_URL: 'https://maps.google.com/?q=', // edit
+    COUPLE: 'שרון ושגיא',                 
+    DATE_ISO: '2026-08-20',               // YYYY-MM-DD
+    TIME: '12:00',                        
+    VENUE: 'חוות אדמה ושמים, יבניאל',        
+    MAP_URL: 'נסיעה עם Waze אל חוות אדמה ושמים, יבנאל: https://waze.com/ul/hsvc601svr',
   },
 
   // Reminder behaviour
