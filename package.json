@@ -1,0 +1,15 @@
+{
+  "name": "wedding-manager-dev",
+  "private": true,
+  "description": "Dev tooling: Apps Script logic tests + RSVP form e2e tests + demo media",
+  "type": "module",
+  "scripts": {
+    "render": "node e2e/render.mjs",
+    "test:gas": "node --test tests/gas/*.test.mjs",
+    "test:e2e": "npm run render && playwright test",
+    "media": "npm run render && node e2e/scripts/capture-media.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "~1.56.0"
+  }
+}
