@@ -1,55 +1,41 @@
-# WhatsApp templates (Hebrew)
+# Message templates (Hebrew)
 
-Every business-initiated WhatsApp message must be a **pre-approved template**.
-Create these in **WhatsApp Manager → Account tools → Message templates**, in
-language **Hebrew (`he`)**. Approval is usually minutes, sometimes up to 24h.
+Messages are plain text sent from your own WhatsApp — **no Meta approval, no
+template categories, no fees**. The built-in templates live in
+`sender/wedding_sender/templates/` and support exactly two placeholders:
 
-The `{{1}}`, `{{2}}` … are variables filled in by the code (in order).
+- `{name}` — the guest/household display name from the Sheet
+- `{link}` — their personal RSVP link (**required** — the whole point)
 
-> **Categories & cost:** put reminders/day-before under **Utility** (cheap,
-> ~$0.006). The invite may be classed **Marketing** (~$0.039) by Meta no matter
-> how you word it — keep it factual to improve your odds. See the main report.
+Use your own file with `--template my_invite.txt`. Anything else in `{...}`
+is rejected at startup so a typo can't reach a guest.
 
 ---
 
-## 1. `wedding_invite`  — category: Utility (may be reclassified Marketing)
+## 1. `invite.txt` — first message
 
-**Body:**
 ```
-שלום {{1}}, הוזמנתם לחתונה שלנו! 🎉
+שלום {name}, הוזמנתם לחתונה של שרון ושגיא! 🎉
+📅 20.08.2026 · 12:00
+📍 חוות אדמה ושמים, יבניאל
 נשמח לאישור הגעה בקישור הבא:
-{{2}}
+{link}
 ```
-- `{{1}}` = guest name
-- `{{2}}` = personal RSVP link
 
-## 2. `wedding_reminder` — category: Utility
+## 2. `reminder.txt` — nudge for non-responders
 
-**Body:**
 ```
-שלום {{1}}, רצינו להזכיר שטרם קיבלנו את אישור ההגעה שלכם.
+שלום {name}, רצינו להזכיר שטרם קיבלנו את אישור ההגעה שלכם לחתונה של שרון ושגיא 💍
 נשמח אם תוכלו לאשר כאן:
-{{2}}
+{link}
 ```
-- `{{1}}` = guest name
-- `{{2}}` = personal RSVP link
-
-## 3. `wedding_day_before` — category: Utility (optional, Phase 4)
-
-**Body:**
-```
-שלום {{1}}! מזכירים שהחתונה מחר בשעה {{2}} ב{{3}}.
-מיקום: {{4}}
-מחכים לראותכם! 💍
-```
-- `{{1}}` = guest name
-- `{{2}}` = time · `{{3}}` = venue · `{{4}}` = map link
 
 ---
 
 ### RTL tips
+
 - Keep links/numbers on **their own line** (as above) so Hebrew + Latin don't
-  render in a jumbled order.
-- Test each template by sending to your own number before the real blast.
-- The template **name** must be lowercase with underscores; the **body** is the
-  Hebrew text above.
+  render in a jumbled order. The built-in templates already do this, and the
+  test suite asserts the link stays on its own last line.
+- Dates read better as `20.08.2026` than ISO inside Hebrew text.
+- Test on your own number (`--live --limit 1`) before the real blast.
