@@ -4,8 +4,9 @@
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('💍 חתונה')
-    .addItem('שליחת הזמנות (PENDING)', 'sendInvites')
-    .addItem('שליחת תזכורות עכשיו', 'sendReminders')
+    .addItem('ייצוא הזמנות לשליחה (PENDING)', 'exportInvites')
+    .addItem('ייצוא תזכורות לשליחה', 'exportReminders')
+    .addItem('ייבוא לוג שליחה (sent_log.csv)', 'showImportDialog')
     .addSeparator()
     .addItem('מילוי מזהים חסרים', 'backfillIds')
     .addItem('סיכום אישורים', 'showSummary')

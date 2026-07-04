@@ -1,9 +1,9 @@
 /**
  * Config.gs — central configuration.
  *
- * Edit the values below. Secrets (WhatsApp token + phone number id) are NOT
- * stored here — they live in Script Properties so they never end up in your
- * git repo. See Setup.gs > setSecrets().
+ * Edit the values below. There are no secrets here: WhatsApp messages are
+ * sent from your own Mac via the WhatsApp Desktop app (see docs/SENDING.md),
+ * so this project needs no API credentials at all.
  */
 
 const CONFIG = {
@@ -13,17 +13,6 @@ const CONFIG = {
     BUDGET: 'Budget',
   },
 
-  // WhatsApp Cloud API (official Meta API)
-  WHATSAPP: {
-    API_VERSION: 'v21.0',
-    TEMPLATE_LANG: 'he', // Hebrew templates
-    TEMPLATES: {
-      INVITE: 'wedding_invite',
-      REMINDER: 'wedding_reminder',
-      DAY_BEFORE: 'wedding_day_before',
-    },
-  },
-
   // Public URL of your deployed RSVP web app.
   // Fill this in AFTER you deploy: Deploy > New deployment > Web app, copy the
   // /exec URL here, then re-deploy if you change it.
@@ -31,17 +20,18 @@ const CONFIG = {
 
   // Wedding details — used in messages and on the RSVP form
   WEDDING: {
-    COUPLE: 'שרון ושגיא',                 
+    COUPLE: 'שרון ושגיא',
     DATE_ISO: '2026-08-20',               // YYYY-MM-DD
-    TIME: '12:00',                        
-    VENUE: 'חוות אדמה ושמים, יבניאל',        
+    TIME: '12:00',
+    VENUE: 'חוות אדמה ושמים, יבניאל',
     MAP_URL: 'נסיעה עם Waze אל חוות אדמה ושמים, יבנאל: https://waze.com/ul/hsvc601svr',
   },
 
-  // Reminder behaviour
+  // Reminder behaviour — used as an export filter (see Export.gs):
+  // guests who already got this many reminders are left out of the
+  // "export reminders" CSV.
   REMINDERS: {
     MAX_PER_GUEST: 2, // max reminders (not counting the original invite)
-    SEND_HOUR: 9,     // local hour (Asia/Jerusalem) for the daily batch
   },
 };
 

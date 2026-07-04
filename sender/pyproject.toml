@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wedding-sender"
+version = "1.0.0"
+description = "Send personalized WhatsApp wedding invitations via WhatsApp Desktop (macOS)"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+wedding-sender = "wedding_sender.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["wedding_sender*"]
+
+[tool.setuptools.package-data]
+wedding_sender = ["templates/*.txt"]
