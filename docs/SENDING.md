@@ -72,14 +72,31 @@ trigger temporary blocks:
   usually do) — that's the biggest trust signal.
 - Pilot with `--limit 3` and check delivery before the full run.
 
-## Limitations
+## Sending the invitation as an image
 
-- **Text only.** The `whatsapp://` scheme cannot attach an image or video, so
-  the invitation graphic can't be auto-sent. Workarounds:
-  - put the invite image at the top of the RSVP page (edit
-    `apps_script/RsvpForm.html` — add an `<img>` above the title), and/or
-  - send the image manually once to a broadcast list, then run the
-    personalized text+link blast with this tool.
+Pass `--image` to send the invitation **graphic** with the personalized
+message as its caption (one WhatsApp message, image + text together):
+
+```bash
+wedding-sender invite --csv invites.csv --image invite.png --live
+```
+
+The `whatsapp://` scheme can't attach media, so the tool does it through the
+Desktop app: it copies the image to the clipboard, pastes it into the chat
+(WhatsApp opens its media preview with the caption box focused), pastes the
+rendered message as the caption, then presses Return. Same Accessibility
+permission as text sending — no extra setup, no API keys.
+
+- `.png`, `.jpg`, and `.jpeg` are supported.
+- `--attach-delay` (default `1.5` s) controls how long to wait for the media
+  preview to open before pasting the caption. On slower machines the caption
+  can land in the plain message box instead — if that happens, bump
+  `--attach-delay` (try `3`) and/or `--chat-load-delay` (try `4`).
+- **Always test first** with your own number:
+  `--image invite.png --live --limit 1`. Confirm the guest receives a single
+  message (image + caption with the working link) before the full run.
+
+## Limitations
 - **Numbers not on WhatsApp** make the Desktop app show an error dialog; the
   keypress lands harmlessly, but the row is still logged as sent. Watch for
   the dialog, fix the number in the Sheet, delete that row from

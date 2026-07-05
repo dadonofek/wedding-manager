@@ -117,9 +117,10 @@ deployment (manual checklist in the docs).
 
 ## Known limits / gotchas
 
-- `whatsapp://` links can prefill **text only** — you can't auto-attach an
-  invitation image/video. Put the invite image on the RSVP page, or send it
-  manually to a broadcast list. (See docs/SENDING.md.)
+- `whatsapp://` links prefill **text only**, so to send the invitation
+  **graphic** the tool pastes it through the Desktop app: pass `--image
+  invite.png` and the personalized message goes out as the image's caption
+  (one message). Test with `--live --limit 1` first. (See docs/SENDING.md.)
 - Sending from a personal account is rate-limited by WhatsApp's anti-spam
   heuristics: keep the built-in 20–45 s delays, send ≤ ~100/day, pilot with
   `--limit 3` first.
