@@ -10,7 +10,7 @@ const GUEST_HEADERS = [
   'name',            // household / guest display name
   'phone',           // 05X... or 9725X... — both work
   'side',            // optional grouping: חתן / כלה / חברים ...
-  'max_guests',      // how many people this invite covers (incl. plus-ones)
+  'max_guests',      // optional, informational only — the form doesn't limit by it
   'status',          // PENDING / SENT / CONFIRMED / DECLINED
   'attending_count', // how many actually coming (filled on RSVP)
   'dietary',         // free text (filled on RSVP)
