@@ -54,6 +54,10 @@ def build_parser() -> argparse.ArgumentParser:
                        help="sent log for resume + Sheet import (default: ./sent_log.csv)")
         p.add_argument("--live", action="store_true",
                        help="actually send (without this flag: dry run)")
+        p.add_argument("--image", type=Path, default=None,
+                       help="attach this image (.png/.jpg); the message becomes its caption")
+        p.add_argument("--attach-delay", type=float, default=1.5,
+                       help="seconds to let the media preview open after pasting the image")
         p.add_argument("--limit", type=int, default=None,
                        help="send at most N messages (pilot batches)")
         p.add_argument("--min-delay", type=float, default=20.0,
@@ -74,6 +78,15 @@ def main(argv: list[str] | None = None) -> int:
     except (TemplateError, OSError) as e:
         print(f"Template error: {e}", file=sys.stderr)
         return 2
+
+    if args.image is not None:
+        if not args.image.is_file():
+            print(f"Image error: {args.image} does not exist", file=sys.stderr)
+            return 2
+        if args.image.suffix.lower() not in {".png", ".jpg", ".jpeg"}:
+            print(f"Image error: unsupported extension {args.image.suffix!r} "
+                  "(use .png/.jpg/.jpeg)", file=sys.stderr)
+            return 2
 
     try:
         guests, warnings = load_guests(args.csv)
@@ -104,13 +117,17 @@ def main(argv: list[str] | None = None) -> int:
         print("Nothing to send.")
         return 0
 
+    attach_note = f" with image {args.image.name}" if args.image else ""
     if not args.live:
         print("--- DRY RUN (no messages will be sent; use --live to send) ---")
+        if args.image:
+            print(f"--- image attachment: {args.image} (message sent as its caption)")
         print("--- first message preview " + "-" * 34)
         print(render_message(template, pending[0]))
         print("-" * 60)
         for i, g in enumerate(pending, 1):
-            print(f"[{i}/{len(pending)}] {g.name or '?'} → {g.phone} ({g.kind}) → would send")
+            print(f"[{i}/{len(pending)}] {g.name or '?'} → {g.phone} ({g.kind}) "
+                  f"→ would send{attach_note}")
         return 0
 
     if sys.platform != "darwin":
@@ -124,7 +141,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[{i}/{len(pending)}] {g.name or '?'} → {g.phone}", end=" ", flush=True)
         try:
             send_via_whatsapp_desktop(
-                g.phone, render_message(template, g), chat_load_delay=args.chat_load_delay
+                g.phone, render_message(template, g),
+                chat_load_delay=args.chat_load_delay,
+                image=args.image, attach_delay=args.attach_delay,
             )
             log.mark(g)
             print("✓ sent")

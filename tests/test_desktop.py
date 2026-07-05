@@ -1,11 +1,16 @@
 import subprocess
+from pathlib import Path
 
 import pytest
 
 from wedding_sender.desktop import (
     FocusLostError,
+    applescript_quote,
+    build_chat_url,
     build_osascript,
+    build_osascript_with_image,
     build_url,
+    clipboard_image_clause,
     send_via_whatsapp_desktop,
 )
 
@@ -37,6 +42,60 @@ def test_send_invokes_osascript_runner():
     assert cmd[0:2] == ["osascript", "-e"]
     assert "whatsapp://send?phone=972501234567" in cmd[2]
     assert kwargs == {"check": True, "capture_output": True, "text": True}
+
+
+def test_applescript_quote_escapes_specials():
+    assert applescript_quote('של"ום \\ שלום') == 'של\\"ום \\\\ שלום'
+    assert applescript_quote("a\nb\rc") == "a\\nb\\rc"
+
+
+def test_clipboard_image_clause_picks_class_by_extension():
+    png = clipboard_image_clause(Path("/tmp/invite.PNG"))
+    assert "«class PNGf»" in png and "/tmp/invite.PNG" in png
+    jpg = clipboard_image_clause(Path("/tmp/invite.jpg"))
+    assert "JPEG picture" in jpg
+
+
+def test_clipboard_image_clause_rejects_unknown_extension():
+    with pytest.raises(ValueError, match="unsupported image extension"):
+        clipboard_image_clause(Path("/tmp/invite.gif"))
+
+
+def test_build_osascript_with_image_pastes_then_captions():
+    osa = build_osascript_with_image(
+        build_chat_url("972501234567"),
+        Path("/tmp/invite.png"),
+        'שלום "רות"',
+        chat_load_delay=3.0,
+        attach_delay=2.0,
+    )
+    assert 'open location "whatsapp://send?phone=972501234567"' in osa
+    assert "text=" not in osa                      # no prefilled draft
+    assert "«class PNGf»" in osa                   # image on the clipboard
+    assert 'set the clipboard to "שלום \\"רות\\""' in osa  # quoted caption
+    assert "delay 3.0" in osa and "delay 2.0" in osa
+    assert osa.count('keystroke "v" using command down') == 2
+    assert osa.count("keystroke return") == 1
+    # a focus check guards every keystroke
+    keystrokes = osa.count("keystroke")
+    assert osa.count("not frontmost") == keystrokes
+
+
+def test_send_with_image_uses_image_script(tmp_path):
+    img = tmp_path / "invite.png"
+    img.write_bytes(b"png")
+    calls = []
+
+    def runner(cmd, **kwargs):
+        calls.append(cmd)
+
+    send_via_whatsapp_desktop("972501234567", "היי", image=img, runner=runner)
+
+    (cmd,) = calls
+    osa = cmd[2]
+    assert "«class PNGf»" in osa
+    assert str(img) in osa
+    assert "text=" not in osa
 
 
 def test_focus_lost_raises_dedicated_error():

@@ -46,6 +46,59 @@ def test_dry_run_is_default_and_sends_nothing(export_csv, forbid_send, tmp_path,
     assert out.count("would send") == 3
 
 
+def test_dry_run_mentions_image(export_csv, forbid_send, tmp_path, capsys):
+    img = tmp_path / "invite.png"
+    img.write_bytes(b"png")
+    rc = run(["invite", "--csv", str(export_csv), "--image", str(img),
+              "--sent-log", str(tmp_path / "log.csv")])
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "DRY RUN" in out
+    assert out.count("would send with image invite.png") == 3
+
+
+def test_missing_image_file_exits_2(export_csv, forbid_send, tmp_path, capsys):
+    rc = run(["invite", "--csv", str(export_csv),
+              "--image", str(tmp_path / "nope.png"),
+              "--sent-log", str(tmp_path / "log.csv")])
+
+    assert rc == 2
+    assert "does not exist" in capsys.readouterr().err
+
+
+def test_unsupported_image_extension_exits_2(export_csv, forbid_send, tmp_path, capsys):
+    img = tmp_path / "invite.gif"
+    img.write_bytes(b"gif")
+    rc = run(["invite", "--csv", str(export_csv), "--image", str(img),
+              "--sent-log", str(tmp_path / "log.csv")])
+
+    assert rc == 2
+    assert "unsupported extension" in capsys.readouterr().err
+
+
+def test_live_passes_image_to_sender(export_csv, monkeypatch, tmp_path):
+    monkeypatch.setattr(sys, "platform", "darwin")
+    monkeypatch.setattr(cli.time, "sleep", lambda s: None)
+    monkeypatch.setattr(cli.random, "uniform", lambda a, b: a)
+    sent = []
+    monkeypatch.setattr(
+        cli, "send_via_whatsapp_desktop",
+        lambda phone, message, **kw: sent.append((phone, kw)),
+    )
+    img = tmp_path / "invite.jpg"
+    img.write_bytes(b"jpg")
+
+    rc = run(["invite", "--csv", str(export_csv), "--live",
+              "--image", str(img), "--attach-delay", "2.5",
+              "--sent-log", str(tmp_path / "log.csv")])
+
+    assert rc == 0
+    assert len(sent) == 3
+    assert all(kw["image"] == img for _, kw in sent)
+    assert all(kw["attach_delay"] == 2.5 for _, kw in sent)
+
+
 def test_live_refuses_on_non_macos(export_csv, forbid_send, monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(sys, "platform", "linux")
     rc = run(["invite", "--csv", str(export_csv), "--live",
