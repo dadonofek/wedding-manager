@@ -21,6 +21,8 @@
     button { margin-top: 22px; width:100%; padding:13px; border:0; border-radius:10px;
              background: var(--accent); color:#fff; font-size:1.05rem; cursor:pointer; }
     button:disabled { opacity:.6; cursor:default; }
+    .update-note { background:#f3ede4; color:#6b5842; padding:10px 12px; border-radius:10px;
+            text-align:center; font-size:.9rem; line-height:1.5; margin: 0 0 4px; }
     .msg { margin-top:16px; padding:12px; border-radius:10px; text-align:center; display:none; }
     .ok { background:#e8f5e9; color:#256029; }
     .err { background:#fdecea; color:#a3251b; }
@@ -39,22 +41,27 @@
         <?= wedding.DATE_ISO ?> · <?= wedding.TIME ?> · <?= wedding.VENUE ?>
       </p>
 
+      <? if (guest.responded) { ?>
+        <div class="update-note">כבר קיבלנו מכם תשובה 💌<br>אפשר לעדכן אותה כאן ולשלוח שוב.</div>
+      <? } ?>
+
       <label for="attending">כמה מכם מגיעים?</label>
       <select id="attending">
         <option value="">בחרו...</option>
-        <? for (var i = 0; i <= guest.maxGuests; i++) { ?>
-          <option value="<?= i ?>"><?= i ?><?= i === 0 ? ' — לא נגיע' : '' ?></option>
+        <? for (var i = 0; i <= 10; i++) { ?>
+          <option value="<?= i ?>"<? if (guest.attending === i) { ?> selected<? } ?>><?= i ?><?= i === 0 ? ' — לא נגיע' : '' ?></option>
         <? } ?>
       </select>
 
       <label for="dietary">הערות / העדפות תזונה (לא חובה)</label>
-      <textarea id="dietary" rows="2" placeholder="צמחוני, אלרגיות וכו'"></textarea>
+      <textarea id="dietary" rows="2" placeholder="צמחוני, אלרגיות וכו'"><?= guest.dietary ?></textarea>
 
-      <button id="send" onclick="submitRsvp()">שליחת אישור</button>
+      <button id="send" onclick="submitRsvp()"><?= guest.responded ? 'עדכון תשובה' : 'שליחת אישור' ?></button>
       <div id="msg" class="msg"></div>
 
       <script>
         var TOKEN = "<?= guest.id ?>";
+        var SEND_LABEL = document.getElementById('send').textContent;
 
         function submitRsvp() {
           var att = document.getElementById('attending').value;
@@ -80,7 +87,7 @@
         }
         function resetBtn() {
           var b = document.getElementById('send');
-          b.disabled = false; b.textContent = 'שליחת אישור';
+          b.disabled = false; b.textContent = SEND_LABEL;
         }
       </script>
     <? } ?>

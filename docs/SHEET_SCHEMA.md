@@ -12,7 +12,7 @@ One row per **household** (a couple or family that gets one invite and one RSVP 
 | `name` | you | display name, e.g. `משפחת כהן` or `דנה ויוסי` |
 | `phone` | you | `05X-XXXXXXX` or `9725XXXXXXXX` — both accepted |
 | `side` | you (optional) | grouping, e.g. `חתן` / `כלה` / `עבודה` |
-| `max_guests` | you | how many people this invite covers (incl. plus-ones) |
+| `max_guests` | you (optional) | informational only — guests pick their own count (0–10) in the form |
 | `status` | auto (log import) | `PENDING` → `SENT` → `CONFIRMED` / `DECLINED` |
 | `attending_count` | auto (RSVP) | how many are actually coming |
 | `dietary` | auto (RSVP) | free-text notes from the guest |
@@ -21,11 +21,12 @@ One row per **household** (a couple or family that gets one invite and one RSVP 
 | `rsvp_at` | auto (RSVP) | when they responded |
 | `notes` | you | scratch column |
 
-**Workflow:** paste names + phones + `max_guests` → run **מילוי מזהים חסרים**
+**Workflow:** paste names + phones → run **מילוי מזהים חסרים**
 (`backfillIds`) to generate `id`s and set everyone to `PENDING` → export,
 send from your Mac, import the log (see [SENDING.md](SENDING.md)).
 
-You only ever type into `name`, `phone`, `side`, `max_guests`, `notes`.
+You only ever type into `name`, `phone`, `side`, `notes`
+(and `max_guests` if you want it for your own bookkeeping).
 Everything else fills itself in:
 
 - `status`, `sent_at`, `reminder_count` update when you **import

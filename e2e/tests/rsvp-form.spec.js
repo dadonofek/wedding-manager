@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '.out');
 const FORM_URL = pathToFileURL(path.join(OUT, 'form.html')).href;
+const RESPONDED_URL = pathToFileURL(path.join(OUT, 'form-responded.html')).href;
 const INVALID_URL = pathToFileURL(path.join(OUT, 'form-invalid.html')).href;
 
 test.describe('RSVP form — guest with a valid token', () => {
@@ -19,11 +20,11 @@ test.describe('RSVP form — guest with a valid token', () => {
     await expect(page.locator('.sub')).toContainText('חוות אדמה ושמים');
   });
 
-  test('attendance dropdown covers 0..maxGuests with a decline label on 0', async ({ page }) => {
+  test('attendance dropdown covers 0..10 with a decline label on 0', async ({ page }) => {
     const options = page.locator('#attending option');
-    await expect(options).toHaveCount(6); // placeholder + 0..4
+    await expect(options).toHaveCount(12); // placeholder + 0..10
     await expect(options.nth(1)).toHaveText('0 — לא נגיע');
-    await expect(options.nth(5)).toHaveText('4');
+    await expect(options.nth(11)).toHaveText('10');
   });
 
   test('submitting without choosing shows an inline error and calls nothing', async ({ page }) => {
@@ -75,6 +76,36 @@ test.describe('RSVP form — guest with a valid token', () => {
 
     await expect(page.locator('#msg')).toHaveClass(/err/);
     await expect(page.locator('#send')).toBeEnabled();
+  });
+});
+
+test.describe('RSVP form — guest who already responded', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(RESPONDED_URL);
+  });
+
+  test('opens pre-filled with the previous answer and an update note', async ({ page }) => {
+    await expect(page.locator('.update-note')).toContainText('לעדכן');
+    await expect(page.locator('#attending')).toHaveValue('2');
+    await expect(page.locator('#dietary')).toHaveValue('צמחוני אחד, בלי גלוטן');
+    await expect(page.locator('#send')).toHaveText('עדכון תשובה');
+  });
+
+  test('changing the answer submits the new values', async ({ page }) => {
+    await page.locator('#attending').selectOption('4');
+    await page.locator('#dietary').fill('');
+    await page.locator('#send').click();
+
+    await expect(page.locator('#msg')).toHaveClass(/ok/);
+    const calls = await page.evaluate(() => window.__rsvpCalls);
+    expect(calls).toEqual([{ token: 'e2etoken99', attending: '4', dietary: '' }]);
+  });
+
+  test('a first-time guest sees no update note and the regular button', async ({ page }) => {
+    await page.goto(FORM_URL);
+    await expect(page.locator('.update-note')).toHaveCount(0);
+    await expect(page.locator('#attending')).toHaveValue('');
+    await expect(page.locator('#send')).toHaveText('שליחת אישור');
   });
 });
 

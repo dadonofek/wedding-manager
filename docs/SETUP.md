@@ -40,9 +40,13 @@ clasp push
 3. Copy the `/exec` URL → paste into `Config.gs` → `RSVP_BASE_URL`.
 4. `clasp push` again (or paste) so exported links use the right URL.
 
+> **Note:** the blue *"This application was created by a Google Apps Script
+> user"* banner at the top of the form is injected by Google on every Apps
+> Script web app and cannot be removed. Guests can dismiss it with the ✕.
+
 ## C. Load the guest list
 
-1. Paste names + phones + `max_guests` into the `Guests` tab
+1. Paste names + phones into the `Guests` tab
    (see [SHEET_SCHEMA.md](SHEET_SCHEMA.md)).
 2. Menu → **מילוי מזהים חסרים** — generates each household's secret token and
    sets everyone to `PENDING`.

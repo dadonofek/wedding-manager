@@ -21,7 +21,14 @@ const REPO = path.join(HERE, '..');
 const OUT = path.join(HERE, '.out');
 
 // Fixture data mirroring what Rsvp.gs doGet() passes to the template.
-export const FIXTURE_GUEST = { id: 'e2etoken99', name: 'משפחת ישראלי', maxGuests: 4 };
+export const FIXTURE_GUEST = {
+  id: 'e2etoken99', name: 'משפחת ישראלי',
+  responded: false, attending: -1, dietary: '',
+};
+export const FIXTURE_GUEST_RESPONDED = {
+  id: 'e2etoken99', name: 'משפחת ישראלי',
+  responded: true, attending: 2, dietary: 'צמחוני אחד, בלי גלוטן',
+};
 export const FIXTURE_WEDDING = {
   COUPLE: 'שרון ושגיא',
   DATE_ISO: '2026-08-20',
@@ -66,9 +73,11 @@ export function renderForm({ guest, wedding = FIXTURE_WEDDING }) {
 
 mkdirSync(OUT, { recursive: true });
 writeFileSync(path.join(OUT, 'form.html'), renderForm({ guest: FIXTURE_GUEST }));
+writeFileSync(path.join(OUT, 'form-responded.html'),
+  renderForm({ guest: FIXTURE_GUEST_RESPONDED }));
 writeFileSync(path.join(OUT, 'form-invalid.html'), renderForm({ guest: null }));
 copyFileSync(
   path.join(HERE, 'shim', 'google-script-shim.js'),
   path.join(OUT, 'google-script-shim.js'),
 );
-console.log(`rendered ${path.relative(REPO, OUT)}/form.html + form-invalid.html`);
+console.log(`rendered ${path.relative(REPO, OUT)}/form.html + form-responded.html + form-invalid.html`);

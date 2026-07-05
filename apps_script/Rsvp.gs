@@ -10,11 +10,18 @@ function doGet(e) {
   const token = e && e.parameter ? e.parameter.token : '';
   const guest = token ? getGuestById_(token) : null;
 
+  // responded → the form opens pre-filled with the previous answer so the
+  // guest can review/update it (attending is -1 when there is no answer yet).
+  const responded = !!guest &&
+    (guest.status === STATUS.CONFIRMED || guest.status === STATUS.DECLINED);
+
   const t = HtmlService.createTemplateFromFile('RsvpForm');
   t.guest = guest ? {
     id: guest.id,
     name: guest.name,
-    maxGuests: Number(guest.max_guests) || 1,
+    responded: responded,
+    attending: responded ? Number(guest.attending_count) || 0 : -1,
+    dietary: guest.dietary ? String(guest.dietary) : '',
   } : null;
   t.wedding = CONFIG.WEDDING;
 
@@ -37,7 +44,8 @@ function submitRsvp(data) {
 
   sh.getRange(guest._row, COL.status).setValue(status);
   sh.getRange(guest._row, COL.attending_count).setValue(attending);
-  if (data.dietary) sh.getRange(guest._row, COL.dietary).setValue(data.dietary);
+  // Always write dietary so a guest updating their answer can also clear it.
+  sh.getRange(guest._row, COL.dietary).setValue(data.dietary || '');
   sh.getRange(guest._row, COL.rsvp_at).setValue(new Date());
 
   return { ok: true, status: status };
